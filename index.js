@@ -5,8 +5,8 @@ function createBoard(size) {
   return board;
 }
 
-function generateValueOnBoard(boardToPopulate) {
-	const board = boardToPopulate.map(row => [...row]);
+function generateTileOnBoard(boardToPopulate) {
+  const board = boardToPopulate.map((row) => [...row]);
   let row = Math.floor(Math.random() * board.length);
   let column = Math.floor(Math.random() * board[0].length);
 
@@ -15,8 +15,9 @@ function generateValueOnBoard(boardToPopulate) {
     column = Math.floor(Math.random() * board[0].length);
   }
 
-  board[row][column] = 2;
-	return board;
+  // 10% chance of 4 and 90% chance of 2
+  board[row][column] = Math.floor(Math.random() * 10) ? 2 : 4;
+  return board;
 }
 
 function sortNullsToBeginning(a, b) {
@@ -65,19 +66,32 @@ function mergeAndSortItems({
   return items;
 }
 
+function getMoveParams(length, direction) {
+  const to = {
+    up: "toStart", // <---- 
+    left: "toStart", // <----
+    down: "toEnd", // ---->
+    right: "toEnd", // ---->
+  };
+  const lastIndex = length - 1;
+  const start = to[direction] === "toEnd" ? lastIndex : 0;
+  const end = to[direction] === "toEnd" ? 0 : lastIndex;
+  const increment = to[direction] === "toEnd" ? -1 : 1;
+  const sortMethod =
+    to[direction] === "toEnd" ? sortNullsToBeginning : sortNullsToEnd;
+  return { start, end, increment, sortMethod };
+}
+
 function moveHorizontal(board, direction) {
   const newBoard = board.map((row) => [...row]);
-
-  const start = direction === "right" ? myBoard[0].length - 1 : 0;
-  const end = direction === "right" ? 0 : myBoard[0].length - 1;
-  const increment = direction === "right" ? -1 : 1;
-  const sortMethod =
-    direction === "right" ? sortNullsToBeginning : sortNullsToEnd;
+  const { start, end, increment, sortMethod } = getMoveParams(
+    myBoard[0].length,
+    direction
+  );
 
   for (let row = 0; row < newBoard[0].length; row++) {
-    let items = newBoard[row].sort(sortNullsToEnd);
     newBoard[row] = mergeAndSortItems({
-      items,
+      items: newBoard[row],
       start,
       end,
       increment,
@@ -90,11 +104,10 @@ function moveHorizontal(board, direction) {
 
 function moveVertical(board, direction) {
   const newBoard = board.map((row) => [...row]);
-
-  const start = direction === "up" ? myBoard[0].length - 1 : 0;
-  const end = direction === "up" ? 0 : myBoard[0].length - 1;
-  const increment = direction === "up" ? -1 : 1;
-  const sortMethod = direction === "up" ? sortNullsToEnd : sortNullsToBeginning;
+  const { start, end, increment, sortMethod } = getMoveParams(
+    myBoard[0].length,
+    direction
+  );
 
   for (let column = 0; column < newBoard[0].length; column++) {
     let items = matrixColumnToArray(newBoard, column);
@@ -106,13 +119,13 @@ function moveVertical(board, direction) {
   return newBoard;
 }
 
-function move(board, direction){
-	if (direction === 'up' || direction === 'down') {
-		return moveVertical(board, direction);
-	}
-	if (direction === 'left' || direction === 'right') {
-		return moveHorizontal(board, direction);
-	}
+function move(board, direction) {
+  if (direction === "up" || direction === "down") {
+    return moveVertical(board, direction);
+  }
+  if (direction === "left" || direction === "right") {
+    return moveHorizontal(board, direction);
+  }
 }
 
 // Populate
@@ -122,12 +135,13 @@ let myBoard = createBoard(4);
 // myBoard[0][1] = 2;
 // myBoard[0][2] = 2;
 // myBoard[0][3] = 2;
-// myBoard[1][3] = 8;
+// myBoard[1][3] = 2;
+// myBoard[2][3] = 2;
 // myBoard[2][2] = 4;
 // myBoard[3][3] = 8;
 
-myBoard = generateValueOnBoard(myBoard);
-myBoard = generateValueOnBoard(myBoard);
+myBoard = generateTileOnBoard(myBoard);
+myBoard = generateTileOnBoard(myBoard);
 
 console.table("Step 1.", myBoard);
 myBoard = move(myBoard, "right");
