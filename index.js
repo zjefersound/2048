@@ -40,6 +40,12 @@ function matrixColumnToArray(matrix, column) {
   return array;
 }
 
+function areBoardsEqual(board1, board2) {
+  const array1 = board1.reduce((arr, row) => [...arr, ...row], []);
+  const array2 = board2.reduce((arr, row) => [...arr, ...row], []);
+  return JSON.stringify(array1) === JSON.stringify(array2);
+}
+
 function mergeItems({ items: itemsToMerge, start, end, increment }) {
   const items = [...itemsToMerge];
   for (let column = start; column !== end; column += increment) {
@@ -68,7 +74,7 @@ function mergeAndSortItems({
 
 function getMoveParams(length, direction) {
   const to = {
-    up: "toStart", // <---- 
+    up: "toStart", // <----
     left: "toStart", // <----
     down: "toEnd", // ---->
     right: "toEnd", // ---->
@@ -82,73 +88,86 @@ function getMoveParams(length, direction) {
   return { start, end, increment, sortMethod };
 }
 
-function moveHorizontal(board, direction) {
-  const newBoard = board.map((row) => [...row]);
-  const { start, end, increment, sortMethod } = getMoveParams(
-    myBoard[0].length,
-    direction
-  );
+function move(board, direction) {
+  let newBoard = board.map((row) => [...row]);
+  const moveParams = getMoveParams(myBoard[0].length, direction);
 
-  for (let row = 0; row < newBoard[0].length; row++) {
-    newBoard[row] = mergeAndSortItems({
-      items: newBoard[row],
-      start,
-      end,
-      increment,
-      sortMethod,
-    });
-  }
-
-  return newBoard;
-}
-
-function moveVertical(board, direction) {
-  const newBoard = board.map((row) => [...row]);
-  const { start, end, increment, sortMethod } = getMoveParams(
-    myBoard[0].length,
-    direction
-  );
-
-  for (let column = 0; column < newBoard[0].length; column++) {
-    let items = matrixColumnToArray(newBoard, column);
-    items = mergeAndSortItems({ items, start, end, increment, sortMethod });
-    for (let row = 0; row <= items.length - 1; row++) {
-      newBoard[row][column] = items[row];
+  if (direction === "up" || direction === "down") {
+    for (let column = 0; column < newBoard[0].length; column++) {
+      let items = matrixColumnToArray(newBoard, column);
+      items = mergeAndSortItems({ items, ...moveParams });
+      for (let row = 0; row <= items.length - 1; row++) {
+        newBoard[row][column] = items[row];
+      }
     }
   }
+  if (direction === "left" || direction === "right") {
+    for (let row = 0; row < newBoard[0].length; row++) {
+      newBoard[row] = mergeAndSortItems({
+        items: newBoard[row],
+        ...moveParams,
+      });
+    }
+  }
+
+  if (!areBoardsEqual(board, newBoard)) {
+    newBoard = generateTileOnBoard(newBoard);
+  }
   return newBoard;
 }
 
-function move(board, direction) {
-  if (direction === "up" || direction === "down") {
-    return moveVertical(board, direction);
-  }
-  if (direction === "left" || direction === "right") {
-    return moveHorizontal(board, direction);
-  }
+function renderBoard(board) {
+  const boardElement = document.getElementById("board");
+  boardElement.innerHTML = "";
+  console.log(board, boardElement);
+  board.forEach((row) => {
+    row.forEach((column) => {
+      const divElement = document.createElement("div");
+      const tileElement = document.createElement("span");
+			if(column) {
+				tileElement.style.backgroundColor = 'rgb(197, 159, 102)';
+				tileElement.style.color = '#FFF';
+
+			}
+      tileElement.innerText = column || "";
+      divElement.appendChild(tileElement);
+      boardElement.appendChild(divElement);
+    });
+  });
 }
 
-// Populate
 let myBoard = createBoard(4);
 
-// myBoard[0][0] = 2;
-// myBoard[0][1] = 2;
-// myBoard[0][2] = 2;
-// myBoard[0][3] = 2;
-// myBoard[1][3] = 2;
-// myBoard[2][3] = 2;
-// myBoard[2][2] = 4;
-// myBoard[3][3] = 8;
+function startGame(myBoard) {
+  // Populate
+  myBoard = generateTileOnBoard(myBoard);
+  myBoard = generateTileOnBoard(myBoard);
 
-myBoard = generateTileOnBoard(myBoard);
-myBoard = generateTileOnBoard(myBoard);
+  renderBoard(myBoard);
 
-console.table("Step 1.", myBoard);
-myBoard = move(myBoard, "right");
-console.table("Step 2.", myBoard);
-myBoard = move(myBoard, "left");
-console.table("Step 3.", myBoard);
-myBoard = move(myBoard, "down");
-console.table("Step 4.", myBoard);
-myBoard = move(myBoard, "up");
-console.table("Step 5.", myBoard);
+  window.addEventListener("keydown", (event) => {
+    if (
+      event.key === "ArrowRight" ||
+      event.key === "ArrowLeft" ||
+      event.key === "ArrowUp" ||
+      event.key === "ArrowDown"
+    ) {
+      if (event.key === "ArrowRight") {
+        myBoard = move(myBoard, "right");
+      }
+      if (event.key === "ArrowLeft") {
+        myBoard = move(myBoard, "left");
+      }
+      if (event.key === "ArrowUp") {
+        myBoard = move(myBoard, "up");
+      }
+      if (event.key === "ArrowDown") {
+        myBoard = move(myBoard, "down");
+      }
+      renderBoard(myBoard);
+      console.table(myBoard);
+    }
+  });
+}
+
+startGame(myBoard);

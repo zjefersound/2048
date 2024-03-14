@@ -1,0 +1,41 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-family: sans-serif;
+}
+
+#board {
+  background: #e0dfd8;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 8px;
+  width: min-content;
+  padding: 8px;
+  border-radius: 12px;
+  margin: 40px auto;
+}
+
+#board div {
+  display: flex;
+  height: 80px;
+  width: 80px;
+  flex-shrink: 0;
+  
+  background: #f5f5f5;
+  border-radius: 8px; 
+}
+
+#board div span {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  font-size: 32px;
+  font-weight: 900;
+  border-radius: 8px;
+  color: rgb(202, 179, 132);
+}
