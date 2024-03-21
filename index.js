@@ -1,3 +1,20 @@
+const STYLE_PER_NUMBER = {
+	2: { backgroundColor: '#f8cb77', fontSize: '32px', color: '#FFFFFF' },
+  4: { backgroundColor: '#e8b961', fontSize: '32px', color: '#FFFFFF' },
+  8: { backgroundColor: '#ff7d40', fontSize: '32px', color: '#FFFFFF' },
+  16: { backgroundColor: '#cb5721', fontSize: '32px', color: '#FFFFFF' },
+  32: { backgroundColor: '#ce321a', fontSize: '32px', color: '#FFFFFF' },
+  64: { backgroundColor: '#a91700', fontSize: '32px', color: '#FFFFFF' },
+  128: { backgroundColor: '#920050', fontSize: '30px', color: '#FFFFFF' },
+  256: { backgroundColor: '#840092', fontSize: '30px', color: '#FFFFFF' },
+  512: { backgroundColor: '#4d1a81', fontSize: '30px', color: '#FFFFFF' },
+  1024: { backgroundColor: '#4d1a81', fontSize: '27px', color: '#FFFFFF' },
+  2048: { backgroundColor: '#0091ff', fontSize: '27px', color: '#FFFFFF' },
+  4096: { backgroundColor: '#008c54', fontSize: '27px', color: '#FFFFFF' },
+  8192: { backgroundColor: '#09af00', fontSize: '27px', color: '#FFFFFF' },
+  16384: { backgroundColor: '#151515', fontSize: '20px', color: '#FFFFFF' },
+}
+
 function createBoard(size) {
   const board = Array(size)
     .fill(1)
@@ -52,6 +69,11 @@ function mergeItems({ items: itemsToMerge, start, end, increment }) {
     const indexToMerge = column + increment;
     if (items[indexToMerge] && items[indexToMerge] === items[column]) {
       items[column] += items[indexToMerge];
+
+      if(items[column] === 2048) {
+        document.getElementById('win').className = 'win'
+      }
+      
       items[indexToMerge] = null;
     }
   }
@@ -125,9 +147,9 @@ function renderBoard(board) {
       const divElement = document.createElement("div");
       const tileElement = document.createElement("span");
 			if(column) {
-				tileElement.style.backgroundColor = 'rgb(197, 159, 102)';
-				tileElement.style.color = '#FFF';
-
+				tileElement.style.background =  STYLE_PER_NUMBER[column].backgroundColor;
+				tileElement.style.color =  STYLE_PER_NUMBER[column].color;
+				tileElement.style.fontSize =  STYLE_PER_NUMBER[column].fontSize;
 			}
       tileElement.innerText = column || "";
       divElement.appendChild(tileElement);
