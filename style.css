@@ -10,13 +10,16 @@ html {
 
 #board {
   background: #e0dfd8;
-  display: grid;
+  /* display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 8px;
-  width: min-content;
-  padding: 8px;
+  padding: 8px; */
+  /* width: min-content; */
   border-radius: 12px;
   margin: 40px auto;
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
 }
 
 #board div {
@@ -38,6 +41,7 @@ html {
   font-weight: 900;
   border-radius: 8px;
   color: rgb(202, 179, 132);
+  transition: .1s;
 }
 #win {
   position: fixed;

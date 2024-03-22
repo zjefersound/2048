@@ -1,19 +1,21 @@
+const TILE_SIZE = 80; // px
+const TILES_GAP = 8; // px
 const STYLE_PER_NUMBER = {
-	2: { backgroundColor: '#f8cb77', fontSize: '32px', color: '#FFFFFF' },
-  4: { backgroundColor: '#e8b961', fontSize: '32px', color: '#FFFFFF' },
-  8: { backgroundColor: '#ff7d40', fontSize: '32px', color: '#FFFFFF' },
-  16: { backgroundColor: '#cb5721', fontSize: '32px', color: '#FFFFFF' },
-  32: { backgroundColor: '#ce321a', fontSize: '32px', color: '#FFFFFF' },
-  64: { backgroundColor: '#a91700', fontSize: '32px', color: '#FFFFFF' },
-  128: { backgroundColor: '#920050', fontSize: '30px', color: '#FFFFFF' },
-  256: { backgroundColor: '#840092', fontSize: '30px', color: '#FFFFFF' },
-  512: { backgroundColor: '#4d1a81', fontSize: '30px', color: '#FFFFFF' },
-  1024: { backgroundColor: '#4d1a81', fontSize: '27px', color: '#FFFFFF' },
-  2048: { backgroundColor: '#0091ff', fontSize: '27px', color: '#FFFFFF' },
-  4096: { backgroundColor: '#008c54', fontSize: '27px', color: '#FFFFFF' },
-  8192: { backgroundColor: '#09af00', fontSize: '27px', color: '#FFFFFF' },
-  16384: { backgroundColor: '#151515', fontSize: '20px', color: '#FFFFFF' },
-}
+  2: { backgroundColor: "#f8cb77", fontSize: "32px", color: "#FFFFFF" },
+  4: { backgroundColor: "#e8b961", fontSize: "32px", color: "#FFFFFF" },
+  8: { backgroundColor: "#ff7d40", fontSize: "32px", color: "#FFFFFF" },
+  16: { backgroundColor: "#cb5721", fontSize: "32px", color: "#FFFFFF" },
+  32: { backgroundColor: "#ce321a", fontSize: "32px", color: "#FFFFFF" },
+  64: { backgroundColor: "#a91700", fontSize: "32px", color: "#FFFFFF" },
+  128: { backgroundColor: "#920050", fontSize: "30px", color: "#FFFFFF" },
+  256: { backgroundColor: "#840092", fontSize: "30px", color: "#FFFFFF" },
+  512: { backgroundColor: "#4d1a81", fontSize: "30px", color: "#FFFFFF" },
+  1024: { backgroundColor: "#4d1a81", fontSize: "27px", color: "#FFFFFF" },
+  2048: { backgroundColor: "#0091ff", fontSize: "27px", color: "#FFFFFF" },
+  4096: { backgroundColor: "#008c54", fontSize: "27px", color: "#FFFFFF" },
+  8192: { backgroundColor: "#09af00", fontSize: "27px", color: "#FFFFFF" },
+  16384: { backgroundColor: "#151515", fontSize: "20px", color: "#FFFFFF" },
+};
 
 function createBoard(size) {
   const board = Array(size)
@@ -33,7 +35,10 @@ function generateTileOnBoard(boardToPopulate) {
   }
 
   // 10% chance of 4 and 90% chance of 2
-  board[row][column] = Math.floor(Math.random() * 10) ? 2 : 4;
+  board[row][column] = {
+    id: Math.random(),
+    number: Math.floor(Math.random() * 10) ? 2 : 4,
+  };
   return board;
 }
 
@@ -67,13 +72,17 @@ function mergeItems({ items: itemsToMerge, start, end, increment }) {
   const items = [...itemsToMerge];
   for (let column = start; column !== end; column += increment) {
     const indexToMerge = column + increment;
-    if (items[indexToMerge] && items[indexToMerge] === items[column]) {
-      items[column] += items[indexToMerge];
+    if (
+      items[indexToMerge] &&
+      items[indexToMerge]?.number === items[column]?.number
+    ) {
+      items[column].number += items[indexToMerge].number;
+      items[column].id = items[indexToMerge].id;
 
-      if(items[column] === 2048) {
-        document.getElementById('win').className = 'win'
+      if (items[column].number === 2048) {
+        document.getElementById("win").className = "win";
       }
-      
+
       items[indexToMerge] = null;
     }
   }
@@ -140,31 +149,61 @@ function move(board, direction) {
 
 function renderBoard(board) {
   const boardElement = document.getElementById("board");
+  boardElement.style.gridTemplateColumns = `repeat(${board.length},1fr)`;
+  boardElement.style.gap = `${TILES_GAP}px`;
+  boardElement.style.padding = `${TILES_GAP}px`;
+  boardElement.style.width = `${
+    board.length * (TILE_SIZE + TILES_GAP) + TILES_GAP
+  }px`;
+
   boardElement.innerHTML = "";
-  console.log(board, boardElement);
-  board.forEach((row) => {
-    row.forEach((column) => {
+
+  board.forEach((row, rowIndex) => {
+    row.forEach((column, columnIndex) => {
       const divElement = document.createElement("div");
+      divElement.style.height = `${TILE_SIZE}px`;
+      divElement.style.width = `${TILE_SIZE}px`;
       const tileElement = document.createElement("span");
-			if(column) {
-				tileElement.style.background =  STYLE_PER_NUMBER[column].backgroundColor;
-				tileElement.style.color =  STYLE_PER_NUMBER[column].color;
-				tileElement.style.fontSize =  STYLE_PER_NUMBER[column].fontSize;
-			}
-      tileElement.innerText = column || "";
+      if (column?.number) {
+        tileElement.id = column.id;
+        tileElement.style.height = `${TILE_SIZE}px`;
+        tileElement.style.width = `${TILE_SIZE}px`;
+
+        tileElement.style.background =
+          STYLE_PER_NUMBER[column.number].backgroundColor;
+        tileElement.style.color = STYLE_PER_NUMBER[column.number].color;
+        tileElement.style.fontSize = STYLE_PER_NUMBER[column.number].fontSize;
+        tileElement.style.position = `absolute`;
+        tileElement.style.top = `${
+          TILES_GAP + rowIndex * (TILE_SIZE + TILES_GAP)
+        }px`;
+        tileElement.style.left = `${
+          TILES_GAP + columnIndex * (TILE_SIZE + TILES_GAP)
+        }px`;
+      }
+      tileElement.innerText = column?.number || "";
       divElement.appendChild(tileElement);
       boardElement.appendChild(divElement);
     });
   });
 }
 
+function getPositionsById(board) {
+  return board.reduce((obj, row, rowIndex) => {
+    row.forEach((column, columnIndex) => {
+      if (column?.id) {
+        obj[column.id] = [rowIndex, columnIndex];
+      }
+    });
+    return obj;
+  }, {});
+}
 let myBoard = createBoard(4);
 
 function startGame(myBoard) {
   // Populate
   myBoard = generateTileOnBoard(myBoard);
   myBoard = generateTileOnBoard(myBoard);
-
   renderBoard(myBoard);
 
   window.addEventListener("keydown", (event) => {
@@ -174,6 +213,8 @@ function startGame(myBoard) {
       event.key === "ArrowUp" ||
       event.key === "ArrowDown"
     ) {
+      const positionsFrom = getPositionsById(myBoard);
+
       if (event.key === "ArrowRight") {
         myBoard = move(myBoard, "right");
       }
@@ -186,8 +227,35 @@ function startGame(myBoard) {
       if (event.key === "ArrowDown") {
         myBoard = move(myBoard, "down");
       }
-      renderBoard(myBoard);
-      console.table(myBoard);
+      const positionsTo = getPositionsById(myBoard);
+
+      Object.entries(positionsFrom).forEach(([key, value]) => {
+        if (positionsTo[key]) {
+          console.log("***", {
+            key,
+            from: value,
+            to: positionsTo[key],
+          });
+
+          const elementToAnimate = document.getElementById(key);
+
+          if (
+            positionsTo[key][0] !== value[0] ||
+            positionsTo[key][1] !== value[1]
+          ) {
+            elementToAnimate.style.scale = "1.1";
+          }
+          elementToAnimate.style.top = `${
+            TILES_GAP + positionsTo[key][0] * (TILE_SIZE + TILES_GAP)
+          }px`;
+          elementToAnimate.style.left = `${
+            TILES_GAP + positionsTo[key][1] * (TILE_SIZE + TILES_GAP)
+          }px`;
+        }
+      });
+      setTimeout(() => {
+        renderBoard(myBoard);
+      }, 100);
     }
   });
 }
