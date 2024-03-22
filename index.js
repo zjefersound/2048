@@ -16,6 +16,8 @@ const STYLE_PER_NUMBER = {
   8192: { backgroundColor: "#09af00", fontSize: "27px", color: "#FFFFFF" },
   16384: { backgroundColor: "#151515", fontSize: "20px", color: "#FFFFFF" },
 };
+const BOARD_SIZE = 4;
+const ANIMATION_DURATION = 100;
 
 function createBoard(size) {
   const board = Array(size)
@@ -146,6 +148,9 @@ function move(board, direction) {
   }
   return newBoard;
 }
+function getOffset(index) {
+  return TILES_GAP + index * (TILE_SIZE + TILES_GAP);
+}
 
 function renderBoard(board) {
   const boardElement = document.getElementById("board");
@@ -174,12 +179,10 @@ function renderBoard(board) {
         tileElement.style.color = STYLE_PER_NUMBER[column.number].color;
         tileElement.style.fontSize = STYLE_PER_NUMBER[column.number].fontSize;
         tileElement.style.position = `absolute`;
-        tileElement.style.top = `${
-          TILES_GAP + rowIndex * (TILE_SIZE + TILES_GAP)
-        }px`;
-        tileElement.style.left = `${
-          TILES_GAP + columnIndex * (TILE_SIZE + TILES_GAP)
-        }px`;
+        tileElement.style.top = `${getOffset(rowIndex)}px`;
+        tileElement.style.left = `${getOffset(columnIndex)}px`;
+        tileElement.style.animationDuration = `${ANIMATION_DURATION}ms`;
+
       }
       tileElement.innerText = column?.number || "";
       divElement.appendChild(tileElement);
@@ -198,7 +201,26 @@ function getPositionsById(board) {
     return obj;
   }, {});
 }
-let myBoard = createBoard(4);
+
+function renderMovement(positionsFrom, positionsTo) {
+  Object.entries(positionsFrom).forEach(([key, positionFrom]) => {
+    if (positionsTo[key]) {
+      const elementToAnimate = document.getElementById(key);
+      if (elementToAnimate) {
+        if (
+          positionsTo[key][0] !== positionFrom[0] ||
+          positionsTo[key][1] !== positionFrom[1]
+        ) {
+          elementToAnimate.style.scale = "1.1";
+        }
+        elementToAnimate.style.top = `${getOffset(positionsTo[key][0])}px`;
+        elementToAnimate.style.left = `${getOffset(positionsTo[key][1])}px`;
+      }
+    }
+  });
+}
+
+let myBoard = createBoard(BOARD_SIZE);
 
 function startGame(myBoard) {
   // Populate
@@ -227,35 +249,12 @@ function startGame(myBoard) {
       if (event.key === "ArrowDown") {
         myBoard = move(myBoard, "down");
       }
+
       const positionsTo = getPositionsById(myBoard);
-
-      Object.entries(positionsFrom).forEach(([key, value]) => {
-        if (positionsTo[key]) {
-          console.log("***", {
-            key,
-            from: value,
-            to: positionsTo[key],
-          });
-
-          const elementToAnimate = document.getElementById(key);
-
-          if (
-            positionsTo[key][0] !== value[0] ||
-            positionsTo[key][1] !== value[1]
-          ) {
-            elementToAnimate.style.scale = "1.1";
-          }
-          elementToAnimate.style.top = `${
-            TILES_GAP + positionsTo[key][0] * (TILE_SIZE + TILES_GAP)
-          }px`;
-          elementToAnimate.style.left = `${
-            TILES_GAP + positionsTo[key][1] * (TILE_SIZE + TILES_GAP)
-          }px`;
-        }
-      });
+      renderMovement(positionsFrom, positionsTo);
       setTimeout(() => {
         renderBoard(myBoard);
-      }, 100);
+      }, ANIMATION_DURATION);
     }
   });
 }
