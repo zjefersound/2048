@@ -1,5 +1,5 @@
-const TILE_SIZE = 80; // px
-const TILES_GAP = 8; // px
+const TILE_SIZE = window.innerWidth < 800 ? window.innerWidth / 4 - 20 : 120; // px
+const TILES_GAP = TILE_SIZE / 10; // px
 const STYLE_PER_NUMBER = {
   2: { backgroundColor: "#f8cb77", fontSize: "32px", color: "#FFFFFF" },
   4: { backgroundColor: "#e8b961", fontSize: "32px", color: "#FFFFFF" },
@@ -182,7 +182,6 @@ function renderBoard(board) {
         tileElement.style.top = `${getOffset(rowIndex)}px`;
         tileElement.style.left = `${getOffset(columnIndex)}px`;
         tileElement.style.animationDuration = `${ANIMATION_DURATION}ms`;
-
       }
       tileElement.innerText = column?.number || "";
       divElement.appendChild(tileElement);
@@ -220,15 +219,58 @@ function renderMovement(positionsFrom, positionsTo) {
   });
 }
 
+function hasMoves(boardToVerify) {
+  const board = boardToVerify.map((row) => [...row]);
+  let hasMoves = false;
+  for (let row = 0; row < board.length; row++) {
+    for (let column = 0; column < board.length; column++) {
+      if (!board[row][column]) {
+        hasMoves = true;
+        break;
+      }
+    }
+  }
+  if (hasMoves) return hasMoves;
+  for (let row = 0; row < board.length; row++) {
+    for (let column = 0; column < board[0].length; column++) {
+      if (
+        board[row][column].number === board[row - 1]?.[column]?.number ||
+        board[row][column].number === board[row][column - 1]?.number ||
+        board[row][column].number === board[row + 1]?.[column]?.number ||
+        board[row][column].number === board[row][column + 1]?.number
+      ) {
+        hasMoves = true;
+        break;
+      }
+      console.log("****", row, column, board[row][column], hasMoves);
+    }
+  }
+  return hasMoves;
+}
+
 let myBoard = createBoard(BOARD_SIZE);
 
+function restartGame() {
+  startGame(myBoard);
+  const lostScreen = document.getElementById("lost-game");
+  lostScreen.style.display = "none";
+}
+
 function startGame(myBoard) {
+  myBoard = createBoard(BOARD_SIZE);
+
   // Populate
   myBoard = generateTileOnBoard(myBoard);
   myBoard = generateTileOnBoard(myBoard);
   renderBoard(myBoard);
 
   window.addEventListener("keydown", (event) => {
+    const lostScreen = document.getElementById("lost-game");
+    if (!hasMoves(myBoard)) {
+      lostScreen.style.display = "flex";
+      return;
+    }
+
     if (
       event.key === "ArrowRight" ||
       event.key === "ArrowLeft" ||

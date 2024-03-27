@@ -10,13 +10,7 @@ html {
 
 #board {
   background: #e0dfd8;
-  /* display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  gap: 8px;
-  padding: 8px; */
-  /* width: min-content; */
   border-radius: 12px;
-  margin: 40px auto;
   position: relative;
   display: flex;
   flex-wrap: wrap;
@@ -41,7 +35,7 @@ html {
   font-weight: 900;
   border-radius: 8px;
   color: rgb(202, 179, 132);
-  transition: .1s;
+  transition: 0.1s;
 }
 #win {
   position: fixed;
@@ -59,9 +53,61 @@ html {
 
 @keyframes jequiti {
   0% {
-      opacity: 1;
+    opacity: 1;
   }
   100% {
-      opacity: 0;
+    opacity: 0;
   }
+}
+
+.board-container {
+  position: relative;
+  margin: 0 auto;
+  width: min-content;
+  height: min-content;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 40px auto;
+}
+
+#lost-game {
+  display: none;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  z-index: 100;
+  background: rgba(53, 38, 8, 0.635);
+  top: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#lost-game p {
+  color: white;
+  margin-bottom: 12px;
+  font-size: 18px;
+}
+
+.btn {
+  outline: 0;
+  border: 0;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 4px;
+  background: #8b7800;
+  cursor: pointer;
+  color: white;
+  text-transform: uppercase;
+  font-size: 14px;
+  font-weight: 700;
+  transition: .2s;
+  box-shadow: 0 2px 4px #0004;
+}
+.btn:hover {
+  background: #7c6c00;
+}
+
+main {
+  /* padding: 32px; */
 }
