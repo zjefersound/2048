@@ -48,6 +48,8 @@ function renderBoard(board) {
 }
 
 function renderMovement(positionsFrom, positionsTo) {
+  if (JSON.stringify(positionsFrom) === JSON.stringify(positionsTo)) return;
+	
   Object.entries(positionsFrom).forEach(([key, positionFrom]) => {
     if (positionsTo[key]) {
       const elementToAnimate = document.getElementById(key);
@@ -67,5 +69,5 @@ function renderMovement(positionsFrom, positionsTo) {
 
 export default {
   renderBoard,
-	renderMovement,
+  renderMovement,
 };
