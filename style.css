@@ -73,6 +73,30 @@ html {
   overflow: hidden;
   margin: 40px auto;
 }
+.score-header {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 auto;
+  padding: 32px;
+}
+.score-header p {
+  font-size: 20px;
+  font-weight: 700;
+  margin-left: 12px;
+  color: #a1a094;
+  position: relative;
+}
+#addNumber {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  opacity: 0;
+  pointer-events: none;
+  animation-name: popup;
+  animation-duration: 300ms;
+  transition: 100ms;
+  color: #8b780099;
+}
 
 #lost-game {
   display: none;
@@ -105,9 +129,24 @@ html {
   text-transform: uppercase;
   font-size: 14px;
   font-weight: 700;
-  transition: .2s;
+  transition: 0.2s;
   box-shadow: 0 2px 4px #0004;
 }
 .btn:hover {
   background: #7c6c00;
+}
+
+@keyframes popup {
+  0% {
+    opacity: 0;
+    
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
 }

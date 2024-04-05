@@ -33,7 +33,7 @@ function generateTileOnBoard(boardToPopulate) {
 
 function getInitialBoard(size) {
   let newBoard = createBoard(size).map((column) => [...column]);
-  
+
   // Populate
   newBoard = generateTileOnBoard(newBoard);
   newBoard = generateTileOnBoard(newBoard);
@@ -41,7 +41,7 @@ function getInitialBoard(size) {
 }
 
 // move tiles
-function mergeItems({ items: itemsToMerge, start, end, increment }) {
+function mergeItems({ items: itemsToMerge, start, end, increment, onMerge }) {
   const items = [...itemsToMerge];
   for (let column = start; column !== end; column += increment) {
     const indexToMerge = column + increment;
@@ -51,7 +51,10 @@ function mergeItems({ items: itemsToMerge, start, end, increment }) {
     ) {
       items[column].number += items[indexToMerge].number;
       items[column].id = items[indexToMerge].id;
-
+      onMerge({
+        id: items[column].id,
+        value: items[column].number
+      })
       if (items[column].number === 2048) {
         document.getElementById("win").className = "win";
       }
@@ -64,6 +67,7 @@ function mergeItems({ items: itemsToMerge, start, end, increment }) {
 
 function mergeAndSortItems({
   items: itemsToMerge,
+  onMerge,
   start,
   end,
   increment,
@@ -71,7 +75,7 @@ function mergeAndSortItems({
 }) {
   let items = [...itemsToMerge];
   items = items.sort(sortMethod);
-  items = mergeItems({ items, start, end, increment });
+  items = mergeItems({ items, start, end, increment, onMerge });
   items = items.sort(sortMethod);
   return items;
 }
@@ -92,14 +96,14 @@ function getMoveParams(length, direction) {
   return { start, end, increment, sortMethod };
 }
 
-function move(board, direction) {
+function move(board, direction, { onMerge }) {
   let newBoard = board.map((row) => [...row]);
   const moveParams = getMoveParams(board[0].length, direction);
 
   if (direction === "up" || direction === "down") {
     for (let column = 0; column < newBoard[0].length; column++) {
       let items = matrixColumnToArray(newBoard, column);
-      items = mergeAndSortItems({ items, ...moveParams });
+      items = mergeAndSortItems({ items, onMerge, ...moveParams });
       for (let row = 0; row <= items.length - 1; row++) {
         newBoard[row][column] = items[row];
       }
@@ -109,6 +113,7 @@ function move(board, direction) {
     for (let row = 0; row < newBoard[0].length; row++) {
       newBoard[row] = mergeAndSortItems({
         items: newBoard[row],
+        onMerge,
         ...moveParams,
       });
     }

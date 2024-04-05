@@ -8,5 +8,4 @@ Merge tiles until you reach 2048! But... how far can you go?
 https://jeff2048.netlify.app/
 
 ## TO DO: 
-- score: every merged tile sums to the total score.
 - improve colors and font size per value: calculate font sizes as a percentage of the tile size
